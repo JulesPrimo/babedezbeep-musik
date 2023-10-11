@@ -18,7 +18,7 @@ const notes = () => {
 
 const audioContext = new AudioContext();
 const pauseBeforeStart = 0.5;
-const tempo = 120;
+const tempo = 240;
 
 const getChordDuration = chord => {
   const seconds = 60 / tempo;
@@ -41,12 +41,32 @@ const getNoteFrequency = name => {
 };
 
 const parsePartition = partition => {
-  return partition.replace(/\s/g, "").split(/(?!\(.*),(?![^(]*?\))/g).map(chord => {
-   return {
+  const chords = partition.replace(/\s/g, "").split(/(?!\(.*),(?![^(]*?\))/g);
+
+  return chords.map(chord => {
+    return {
       duration: getChordDuration(chord),
-      frequencies: chord.replace(/.*\(|\).*/g, "").split(",").map(note => getNoteFrequency(note)),
+      frequencies: getSlideOrigAndDest(chord),
       name: chord,
     }
+  })
+}
+
+const getSlideOrigAndDest = chord => {
+  const origAndDest = {}
+
+  const slide = chord.split("->");
+
+  origAndDest.origin = getChordFrequencies(slide[0]);
+
+  origAndDest.destination = slide[1] ? getChordFrequencies(slide[1]) : origAndDest.origin;
+
+  return origAndDest;
+}
+
+const getChordFrequencies = chord => {
+  return chord.replace(/.*\(|\).*/g, "").split(",").map(note => {
+    return getNoteFrequency(note);
   })
 }
 
@@ -58,10 +78,7 @@ const play = async partition => {
 
   const offlineContext = new OfflineAudioContext(1, audioContext.sampleRate * duration, audioContext.sampleRate);
 
-  const gainNode = offlineContext.createGain();
-  gainNode.connect(offlineContext.destination);
-
-  await enqueueChords(chords, offlineContext, gainNode);
+  enqueueChords(chords, offlineContext);
 
   const renderedBuffer = await offlineContext.startRendering();
 
@@ -74,44 +91,54 @@ const play = async partition => {
   return source;
 }
 
-const enqueueChords = async (chords, context, gainNode) => {
+const enqueueChords = (chords, context) => {
   let startTime = 0;
 
-  const chordsPromises = chords.map(chord => {
-    const { frequencies, duration } = chord;
+  chords.forEach(({ frequencies, duration })  => {
     endTime = startTime + duration;
-    const splittedGain = 1 / frequencies.length;
+    const gainValue = 1 / frequencies.origin.length;
 
-    gainNode.gain.setValueAtTime(0, startTime);
-    gainNode.gain.linearRampToValueAtTime(splittedGain, startTime + 0.005);
-    gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
-
-    const oscillatorPromises = frequencies.map(frequency => {
-      return new Promise(resolve => {
-        const oscillator = context.createOscillator();
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(frequency, startTime);
-        oscillator.connect(gainNode);
-        oscillator.start(startTime);
-        oscillator.stop(endTime);
-
-        resolve();
-      });
+    frequencies.origin.forEach((frequency, i) => {
+      createOscillatorForFrequency(context, frequency, startTime, endTime, gainValue, frequencies.destination[i]);
     });
 
-    startTime += chord.duration;
-
-    return Promise.all(oscillatorPromises);
+    startTime += duration;
   });
-
-  await Promise.all(chordsPromises);
 }
 
-const partition = "F6,E6,G6,B6,D#6,(D,F#,A),(D,F#,A),(A,C#,E),(A,C#,E),(B,D,F#),(B,D,F#),(G,B,D),(G,B,D),(D,F#,A),(D,F#,A),(G,B,D),(G,B,D),(A,C#,E),(A,C#,E),(D,F#,A),(D,F#,A)";
+const createGainForFrequency = (context, startTime, endTime, gainValue) => {
+  const gainNode = context.createGain();
+
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.005);
+  gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
+  gainNode.connect(context.destination);
+
+  return gainNode;
+}
+
+const createOscillatorForFrequency = (context, frequency, startTime, endTime, gainValue, destination) => {
+  const oscillator = context.createOscillator();
+
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(frequency, startTime);
+  oscillator.frequency.linearRampToValueAtTime(destination, endTime);
+  oscillator.start(startTime);
+  oscillator.stop(endTime);
+  oscillator.connect(
+    createGainForFrequency(context, startTime, endTime, gainValue)
+  );
+
+  return oscillator;
+}
+
+const partition = "(A,B,C)->(B,D,E), (A,B,C), F->A";
 
 let song = null;
 
-start = async () => { song = song || await play(partition); song.start() };
+start = async () => { song = song || await play(partition); song.start(); return song; };
 pause = () => audioContext.suspend();
 resume = () => audioContext.resume();
 stop = () => { song.stop(); song = null; };
+
+start();
