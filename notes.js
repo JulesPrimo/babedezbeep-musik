@@ -11,53 +11,48 @@ const notes = [
   { name: "A", frequency: 440.00 },
   { name: "A#", frequency: 466.16 },
   { name: "B", frequency: 493.88 },
+  { name: "-", frequency: 0 },
 ];
 
 const audioContext = new AudioContext();
 const pauseBeforeStart = 0.5;
 const tempo = 120;
 
-const zbeep = async (chord, prevTime = 0) => {
-  const time = prevTime;
-  const duration = chord.duration;
+const zbeep = async (chord, startTime = 0) => {
+  const endTime = startTime +  chord.duration;
   const splittedGain = 1 / chord.frequencies.length;
+  const gainNode = audioContext.createGain();
+
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(splittedGain, startTime + 0.005);
+  gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
 
   const oscillatorPromises = chord.frequencies.map(frequency => {
     return new Promise(resolve => {
-      const oscillator = audioContext.createOscillator();
-
-      const gainNode = audioContext.createGain();
-
-      gainNode.gain.setValueAtTime(0, time);
-      gainNode.gain.linearRampToValueAtTime(splittedGain, time + 0.005);
+      let oscillator = audioContext.createOscillator();
 
       oscillator.connect(gainNode);
-
-      gainNode.connect(audioContext.destination);
-
-      oscillator.type = "triangle";
-      oscillator.frequency.setValueAtTime(frequency, time);
-
-      oscillator.start(time);
-
-      endTime = time + duration;
-
-      gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
-
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, startTime);
+      oscillator.start(startTime);
       oscillator.stop(endTime);
 
       oscillator.onended = () => {
         oscillator.disconnect();
-        gainNode.disconnect();
+        oscillator = null;
 
         resolve();
       };
     });
   });
 
+  gainNode.connect(audioContext.destination);
+
   await Promise.all(oscillatorPromises);
 
-  return time + duration;
+  gainNode.disconnect();
+
+  return endTime;
 };
 
 const getChordDuration = chord => {
@@ -80,29 +75,41 @@ const getNoteFrequency = name => {
   return frequency * (2 ** exposure);
 };
 
-const playChords = async chords => {
-  let prevTime = 0;
-
+const playChords = async (chords, prevTime = 0) => {
   for (const chord of chords) {
+    console.log(chord.name)
 
-    if (chord.toString().startsWith("-")) {
-      prevTime += duration;
+    if (chord.name.startsWith("-")) {
+      prevTime += chord.duration;
       continue;
     }
 
     prevTime = await zbeep(chord, prevTime);
   }
+
+  return prevTime;
 };
 
 const parsePartition = partition => {
   return partition.replace(/\s/g, "").split(/(?!\(.*),(?![^(]*?\))/g).map(chord => {
    return {
       duration: getChordDuration(chord),
-      frequencies: chord.replace(/.*\(|\).*/g, "").split(",").map(note => getNoteFrequency(note))
+      frequencies: chord.replace(/.*\(|\).*/g, "").split(",").map(note => getNoteFrequency(note)),
+      name: chord,
     }
   })
 }
 
-const partition = "E6/2,(E, G#, B)/3,(E, G#, B)/3,(E, G#, B)/3,(F, A,C),(E, G#, B)*2,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8"
+//const partition = "E6/2,(E, G#, B)/3,(E, G#, B)/3,(E, G#, B)/3,(F, A,C),(E, G#, B)*2,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8,(G,B,D)/8"
 
-await playChords(parsePartition(partition));
+const partition = "(D,F#,A),-,(D,F#,A),(A,C#,E),(A,C#,E),(B,D,F#),(B,D,F#),(G,B,D),(G,B,D),(D,F#,A),(D,F#,A),(G,B,D),(G,B,D),(A,C#,E),(A,C#,E),(D,F#,A),(D,F#,A)";
+
+const loop = async () => {
+  prevTime = pauseBeforeStart;
+
+  while (true) {
+    prevTime = await playChords(parsePartition(partition), prevTime);
+  }
+}
+
+loop();
