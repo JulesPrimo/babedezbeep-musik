@@ -18,7 +18,7 @@ const notes = () => {
 
 const audioContext = new AudioContext();
 const pauseBeforeStart = 0.5;
-const tempo = 240;
+const tempo = 120;
 
 const getChordDuration = chord => {
   const seconds = 60 / tempo;
@@ -132,7 +132,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "(A,B,C)->(B,D,E), (A,B,C), F->A";
+const partition = "(A,B,C)->(B,D,E)*2, (A,B,C), F->A, A->G, G->D, (E,G,B)->(A,F,E)/3, (E,G,B)->(A,F,E)/3, (E,G,B)->(A,F,E)/3, (E,G,B)->(A,F,E)/3";
 
 let song = null;
 
