@@ -1,5 +1,5 @@
-const notes = () => {
-  return [
+const getNote = (note) => {
+  const notes = [
     { name: "C", frequency: 261.63 },
     { name: "C#", frequency: 277.18 },
     { name: "D", frequency: 293.66 },
@@ -14,6 +14,25 @@ const notes = () => {
     { name: "B", frequency: 493.88 },
     { name: "-", frequency: 0 },
   ];
+
+  const scale = ["C", "D", "E", "F", "G", "A", "B"]
+
+  note = note.toUpperCase();
+
+  const [noteName, signature] = note.split('');
+
+  if (signature === "B") {
+    if (noteName === "C") { return { name: "B", frequency:  493.88 / 2 }; }
+
+    note = [scale[scale.lastIndexOf(noteName) - 1], noteName === "F" ? "" : "#"].join("");
+  }
+
+  if (signature === "#") {
+    if (noteName === "B") { return { name: "C", frequency:  261.63 * 2 }; }
+    if (noteName === "E") { note = "F"; }
+  }
+
+  return notes.find(({ name }) => name === note)
 }
 
 const audioContext = new AudioContext();
@@ -46,28 +65,27 @@ const parsePartition = partition => {
   return chords.map(chord => {
     return {
       duration: getChordDuration(chord),
-      frequencies: getSlideOrigAndDest(chord),
+      frequencies: getRampFrequencies(chord),
       name: chord,
     }
   })
 }
 
-const getSlideOrigAndDest = chord => {
-  const origAndDest = {}
+const getRampFrequencies = chord => {
+  const ramp = chord.split("->");
+  const steps = ramp.map(step => getChordFrequencies(step));
 
-  const slide = chord.split("->");
+  console.log("steps", steps);
 
-  origAndDest.origin = getChordFrequencies(slide[0]);
-
-  origAndDest.destination = slide[1] ? getChordFrequencies(slide[1]) : origAndDest.origin;
-
-  return origAndDest;
+  steps.forEach((step, i) => {
+    console.log("step", step);
+  });
 }
 
 const getChordFrequencies = chord => {
   return chord.replace(/.*\(|\).*/g, "").split(",").map(note => {
     return getNoteFrequency(note);
-  })
+  });
 }
 
 const totalDuration = chords => chords.reduce((acc, chord) => acc + chord.duration, 0);
@@ -132,7 +150,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "(A,B,C)->(B,D,E), (A,B,C), F->A";
+const partition = "F, F->A->B->G->D*4,(A,B)->(C,D)";
 
 let song = null;
 
@@ -141,4 +159,4 @@ pause = () => audioContext.suspend();
 resume = () => audioContext.resume();
 stop = () => { song.stop(); song = null; };
 
-start();
+console.log(parsePartition(partition));
