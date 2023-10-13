@@ -35,8 +35,6 @@ const getNote = (note) => {
   return notes.find(({ name }) => name === note)
 }
 
-const audioContext = new AudioContext();
-const pauseBeforeStart = 0.5;
 const tempo = 240;
 
 const getChordDuration = chord => {
@@ -60,7 +58,7 @@ const getNoteFrequency = name => {
 };
 
 const parsePartition = partition => {
-  const chords = partition.replace(/\s/g, "").split(/(?!\(.*),(?![^(]*?\))/g);
+  const chords = partition.replace(/\s/g, "").replace(/,+/g, ',').split(/(?!\(.*),(?![^(]*?\))/g);
 
   return chords.map(chord => {
     return {
@@ -150,13 +148,34 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "(A8,d)->(b,c)*9";
+const partition = "(A8,d)->(bb,c),F,eb,g#,f,f,,f*2,(b,,d,e)/2,(b,d,e)/2,((a,g,,,c)->(g,f,a#))*9";
 
 let song = null;
+let audioContext = null;
+let started = false;
 
-start = async () => { song = song || await play(partition); song.start(); return song; };
-pause = () => audioContext.suspend();
-resume = () => audioContext.resume();
-stop = () => { song.stop(); song = null; };
+const start = async () => {
+  audioContext = audioContext || new AudioContext();
 
-start();
+  if (!started) {
+    audioContext.resume();
+    started = true;
+    song = song || await play(partition);
+    song.start();
+    return;
+  }
+
+  stop();
+  start();
+};
+
+const pause = () => audioContext.suspend();
+const resume = () => audioContext.resume();
+
+const stop = () => {
+  if (song === null) { return; }
+
+  started = false;
+  song.stop();
+  song = null;
+};
