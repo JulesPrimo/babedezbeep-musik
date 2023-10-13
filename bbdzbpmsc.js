@@ -156,12 +156,13 @@ let started = false;
 
 const start = async () => {
   audioContext = audioContext || new AudioContext();
+  song = song || await play(partition);
 
   if (!started) {
     audioContext.resume();
     started = true;
-    song = song || await play(partition);
     song.start();
+
     return;
   }
 
