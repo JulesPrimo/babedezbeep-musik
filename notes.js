@@ -50,11 +50,11 @@ const getChordDuration = chord => {
 };
 
 const getNoteFrequency = name => {
-  const { note, scale } = /(?<note>[A-Z](#|b)?|-)?(?<scale>\d*)/.exec(name).groups;
+  const { note, scale } = /(?<note>[A-Za-z](#|b)?|-)?(?<scale>\d*)/.exec(name).groups;
 
   const exposure = scale === "" ? 0 : parseInt(scale) - 4;
 
-  const { frequency } = getNote(name);
+  const { frequency } = getNote(note);
 
   return frequency * (2 ** exposure);
 };
@@ -72,8 +72,9 @@ const parsePartition = partition => {
 }
 
 const getRampFrequencies = chord => {
-  console.log(chord)
+
   const ramp = chord.replace(/(\*|\/)\d*$/g, "").split("->");
+
   const steps = ramp.map(step => getChordFrequencies(step));
 
   return steps[0].map((step, i) => {
@@ -87,11 +88,7 @@ const getRampFrequencies = chord => {
   });
 }
 
-const getChordFrequencies = chord => {
-  return chord.replace(/.*\(|\).*/g, "").split(",").map(note => {
-    return getNoteFrequency(note);
-  });
-}
+const getChordFrequencies = chord => chord.replace(/.*\(|\).*/g, "").split(",").map(note => getNoteFrequency(note));
 
 const totalDuration = chords => chords.reduce((acc, chord) => acc + chord.duration, 0);
 
@@ -133,7 +130,6 @@ const enqueueChords = (chords, context) => {
 const createGainNode = (context, startTime, endTime, gainValue) => {
   const gainNode = context.createGain();
 
-  console.log(gainValue)
   gainNode.gain.setValueAtTime(0, startTime);
   gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.005);
   gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
@@ -164,7 +160,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "a->d*9";
+const partition = "A8->d*9";
 
 let song = null;
 
