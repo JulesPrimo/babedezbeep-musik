@@ -4,9 +4,18 @@
   <script src="./bbdzbpmsc.js"></script>
 </head>
 <body>
+  <input type="text" id="partition" style="width: 100%;"/>
+  <hr />
   <button onclick="start();">start</button>
   <button onclick="pause();">pause</button>
   <button onclick="resume();">resume</button>
   <button onclick="stop();">stop</button>
 </body>
+<script>
+  const partitionInput = document.getElementById('partition');
+  partitionInput.value = getPartition();
+  partitionInput.onchange = function() {
+    setPartition(partitionInput.value);
+  }
+</script>
 </html>

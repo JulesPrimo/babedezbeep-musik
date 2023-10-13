@@ -148,7 +148,15 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "(A8,d)->(bb,c),F,eb,g#,f,f,,f*2,(b,,d,e)/2,(b,d,e)/2,((a,g,,,c)->(g,f,a#))*9";
+let partition = "(A8,d)->(bb,c),F,eb,g#,f,f,,f*2,(b,,d,e)/2,(b,d,e)/2,((a,g,,,c)->(g,f,a#))*9,a->b->bb->c#->f*6";
+
+const getPartition = () => partition;
+
+const setPartition = newPartition => {
+  stop();
+  partition = newPartition;
+  start();
+}
 
 let song = null;
 let audioContext = null;
@@ -156,7 +164,7 @@ let started = false;
 
 const start = async () => {
   audioContext = audioContext || new AudioContext();
-  song = song || await play(partition);
+  song = song || await play(getPartition());
 
   if (!started) {
     audioContext.resume();
