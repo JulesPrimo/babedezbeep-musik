@@ -35,7 +35,7 @@ const getNote = (note) => {
   return notes.find(({ name }) => name === note)
 }
 
-const tempo = 240;
+const tempo = 120;
 
 const getChordDuration = chord => {
   const seconds = 60 / tempo;
@@ -148,7 +148,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-let partition = "(A8,d)->(bb,c),F,eb,g#,f,f,,f*2,(b,,d,e)/2,(b,d,e)/2,((a,g,,,c)->(g,f,a#))*9,a->b->bb->c#->f*6";
+let partition = "c,d,e,f,g,a,b,c5,-,(C,E,G),(C,E,G),(C,E,G)*2,(A,C,E),(A,C,E),(A,C,E)*2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)*6,-*2,c->a*4,(A,B)->(A,F#)*4,(A,B#,E#,C,F,G)->(A,G,D,F,F,B)*8";
 
 const getPartition = () => partition;
 
