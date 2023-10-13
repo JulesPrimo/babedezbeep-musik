@@ -150,7 +150,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "A8->d*9";
+const partition = "(A8,d)->(b,c)*9";
 
 let song = null;
 
