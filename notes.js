@@ -50,11 +50,11 @@ const getChordDuration = chord => {
 };
 
 const getNoteFrequency = name => {
-  const { note, scale } = /(?<note>[A-Z]#?|-)?(?<scale>\d*)/.exec(name).groups;
+  const { note, scale } = /(?<note>[A-Z](#|b)?|-)?(?<scale>\d*)/.exec(name).groups;
 
   const exposure = scale === "" ? 0 : parseInt(scale) - 4;
 
-  const { frequency } = notes().find(({ name }) => name === note);
+  const { frequency } = getNote(name);
 
   return frequency * (2 ** exposure);
 };
@@ -75,10 +75,14 @@ const getRampFrequencies = chord => {
   const ramp = chord.split("->");
   const steps = ramp.map(step => getChordFrequencies(step));
 
-  console.log("steps", steps);
+  return steps[0].map((step, i) => {
+    const rampFrequency = [step]
 
-  steps.forEach((step, i) => {
-    console.log("step", step);
+    for(let j = 1; j < steps.length; j++) {
+      rampFrequency.push(steps[j][i]);
+    }
+
+    return rampFrequency;
   });
 }
 
@@ -114,19 +118,21 @@ const enqueueChords = (chords, context) => {
 
   chords.forEach(({ frequencies, duration })  => {
     endTime = startTime + duration;
-    const gainValue = 1 / frequencies.origin.length;
 
-    frequencies.origin.forEach((frequency, i) => {
-      createOscillatorForFrequency(context, frequency, startTime, endTime, gainValue, frequencies.destination[i]);
+    const gainValue = 1 / frequencies.length;
+
+    frequencies.forEach((frequency) => {
+      createOscillatorForFrequency(context, frequency, startTime, endTime, gainValue);
     });
 
     startTime += duration;
   });
 }
 
-const createGainForFrequency = (context, startTime, endTime, gainValue) => {
+const createGainNode = (context, startTime, endTime, gainValue) => {
   const gainNode = context.createGain();
 
+  console.log(gainValue)
   gainNode.gain.setValueAtTime(0, startTime);
   gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.005);
   gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
@@ -135,22 +141,29 @@ const createGainForFrequency = (context, startTime, endTime, gainValue) => {
   return gainNode;
 }
 
-const createOscillatorForFrequency = (context, frequency, startTime, endTime, gainValue, destination) => {
+const createOscillatorForFrequency = (context, frequency, startTime, endTime, gainValue) => {
   const oscillator = context.createOscillator();
 
   oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(frequency, startTime);
-  oscillator.frequency.linearRampToValueAtTime(destination, endTime);
+
+  oscillator.frequency.setValueAtTime(frequency[0], startTime);
+
+  const rampTime = (endTime - startTime) / frequency.length;
+
+  for(let i = 1; i < frequency.length; i++) {
+    oscillator.frequency.linearRampToValueAtTime(frequency[i], startTime + i * rampTime);
+  }
+
   oscillator.start(startTime);
   oscillator.stop(endTime);
   oscillator.connect(
-    createGainForFrequency(context, startTime, endTime, gainValue)
+    createGainNode(context, startTime, endTime, gainValue)
   );
 
   return oscillator;
 }
 
-const partition = "F, F->A->B->G->D*4,(A,B)->(C,D)";
+const partition = "((a,b)->(a,d))*9";
 
 let song = null;
 
@@ -158,5 +171,5 @@ start = async () => { song = song || await play(partition); song.start(); return
 pause = () => audioContext.suspend();
 resume = () => audioContext.resume();
 stop = () => { song.stop(); song = null; };
-
-console.log(parsePartition(partition));
+play(partition);
+start();
