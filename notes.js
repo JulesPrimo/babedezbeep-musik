@@ -72,7 +72,8 @@ const parsePartition = partition => {
 }
 
 const getRampFrequencies = chord => {
-  const ramp = chord.split("->");
+  console.log(chord)
+  const ramp = chord.replace(/(\*|\/)\d*$/g, "").split("->");
   const steps = ramp.map(step => getChordFrequencies(step));
 
   return steps[0].map((step, i) => {
@@ -163,7 +164,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-const partition = "((a,b)->(a,d))*9";
+const partition = "a->d*9";
 
 let song = null;
 
@@ -171,5 +172,5 @@ start = async () => { song = song || await play(partition); song.start(); return
 pause = () => audioContext.suspend();
 resume = () => audioContext.resume();
 stop = () => { song.stop(); song = null; };
-play(partition);
+
 start();
