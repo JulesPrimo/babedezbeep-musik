@@ -105,7 +105,7 @@ const enqueueChords = (chords, context) => {
   let startTime = 0;
 
   chords.forEach(({ frequencies, duration })  => {
-    endTime = startTime + duration;
+    const endTime = startTime + duration;
 
     const gainValue = 1 / frequencies.length;
 
