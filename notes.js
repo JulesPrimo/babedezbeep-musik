@@ -72,20 +72,10 @@ const parsePartition = partition => {
 }
 
 const getRampFrequencies = chord => {
-
   const ramp = chord.replace(/(\*|\/)\d*$/g, "").split("->");
-
   const steps = ramp.map(step => getChordFrequencies(step));
 
-  return steps[0].map((step, i) => {
-    const rampFrequency = [step]
-
-    for(let j = 1; j < steps.length; j++) {
-      rampFrequency.push(steps[j][i]);
-    }
-
-    return rampFrequency;
-  });
+  return steps[0].map((step, i) => [step, ...steps.slice(1).map(step => step[i])]);
 }
 
 const getChordFrequencies = chord => chord.replace(/.*\(|\).*/g, "").split(",").map(note => getNoteFrequency(note));
