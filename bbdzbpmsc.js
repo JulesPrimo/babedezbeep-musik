@@ -35,7 +35,7 @@ const getNote = (note) => {
   return notes.find(({ name }) => name === note)
 }
 
-const tempo = 120;
+const tempo = 480;
 
 const getChordDuration = chord => {
   const seconds = 60 / tempo;
@@ -119,8 +119,9 @@ const createGainNode = (context, startTime, endTime, gainValue) => {
   const gainNode = context.createGain();
 
   gainNode.gain.setValueAtTime(0, startTime);
-  gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.005);
-  gainNode.gain.linearRampToValueAtTime(0, endTime - 0.005);
+  gainNode.gain.setValueAtTime(0, endTime);
+  gainNode.gain.linearRampToValueAtTime(gainValue, startTime + 0.01);
+  gainNode.gain.linearRampToValueAtTime(0, endTime - 0.05);
   gainNode.connect(context.destination);
 
   return gainNode;
@@ -129,7 +130,7 @@ const createGainNode = (context, startTime, endTime, gainValue) => {
 const createOscillatorForFrequency = (context, frequency, startTime, endTime, gainValue) => {
   const oscillator = context.createOscillator();
 
-  oscillator.type = "sine";
+  oscillator.type = "triangle";
 
   oscillator.frequency.setValueAtTime(frequency[0], startTime);
 
