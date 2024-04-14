@@ -148,7 +148,9 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-let partition = "c,d,e,f,g,a,b,c5,-,(C,E,G),(C,E,G),(C,E,G)*2,(A,C,E),(A,C,E),(A,C,E)*2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)*6,-*2,c->a*4,(A,B)->(A,F#)*4,(A,B#,E#,C,F,G)->(A3,A3,A3,A3,E3,E3)*8";
+//let partition = "c,d,e,f,g,a,b,c5,-,(C,E,G),(C,E,G),(C,E,G)*2,(A,C,E),(A,C,E),(A,C,E)*2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)*6,-*2,c->a*4,(A,B)->(A,F#)*4,(A,B#,E#,C,F,G)->(A3,A3,A3,A3,E3,E3)*8";
+
+let partition = "f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,b/2,g/2,e*2,-/2,d/2,e/2,g/2,e*3,f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,e5/2,b/2,g*2,-/2,b/2,g/2,d/2,e*3,d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(e,g)/2,(f,a),(g,b)/2,(a,c5)/2,(b,d5),(c5,e5)/2,(d5,f5)/2,(e5,g5)*3,d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(c,e)/2,(e,g)/2,(d,f)/2,(g,b)/2,(f,a)/2,(a,c5)/2,(g,b)/2,(c5,e5)/2,(b,d5)/2,(e5,g5)/2,(d5,f5)/2,(g5,b5)/2,(f5,a5)/2,a5/4,b5/4,-/4,g5/4,(a5,e)*8";
 
 const getPartition = () => partition;
 
@@ -186,3 +188,12 @@ const stop = () => {
   song.stop();
   song = null;
 };
+
+// f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,b/2,g/2,e*2,-/2,d/2,e/2,g/2,e*3,f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,e5/2,b/2,g*2,-/2,b/2,g/2,d/2,e*3,d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(e,g)/2,(f,a),(g,b)/2,(a,c5)/2,(b,d5),(c5,e5)/2,(d5,f5)/2,(e5,g5)*3
+
+
+//d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(c,e)/2,(e,g)/2,(d,f)/2,(g,b)/2,(f,a)/2,(a,c5)/2,(g,b)/2,(c5,e5)/2,(b,d5)/2,(e5,g5)/2,(d5,f5)/2,(g5,b5)/2,(f5,a5)/2,a5/4,b5/4,-/4,g5/4,(a5,e)*8
+
+//d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3
+
+// f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,b/2,g/2,e*2,-/2,d/2,e/2,g/2,e*3,f/2,a/2,b,f/2,a/2,b,f/2,a/2,b/2,e5/2,d5,b/2,c5/2,e5/2,b/2,g*2,-/2,b/2,g/2,d/2,e*3,d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(e,g)/2,(f,a),(g,b)/2,(a,c5)/2,(b,d5),(c5,e5)/2,(d5,f5)/2,(e5,g5)*3,d/2,e/2,f,g/2,a/2,b,c5/2,b/2,e*3,(d,f)/2,(c,e)/2,(e,g)/2,(d,f)/2,(g,b)/2,(f,a)/2,(a,c5)/2,(g,b)/2,(c5,e5)/2,(b,d5)/2,(e5,g5)/2,(d5,f5)/2,(g5,b5)/2,(f5,a5)/2,a5/4,b5/4,-/4,g5/4,(a5,e)*8
