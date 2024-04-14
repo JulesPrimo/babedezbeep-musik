@@ -148,7 +148,7 @@ const createOscillatorForFrequency = (context, frequency, startTime, endTime, ga
   return oscillator;
 }
 
-let partition = "c,d,e,f,g,a,b,c5,-,(C,E,G),(C,E,G),(C,E,G)*2,(A,C,E),(A,C,E),(A,C,E)*2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)*6,-*2,c->a*4,(A,B)->(A,F#)*4,(A,B#,E#,C,F,G)->(A3,G3,D8,F3,F3,B3)*8";
+let partition = "c,d,e,f,g,a,b,c5,-,(C,E,G),(C,E,G),(C,E,G)*2,(A,C,E),(A,C,E),(A,C,E)*2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)/2,(E,G#,B)*6,-*2,c->a*4,(A,B)->(A,F#)*4,(A,B#,E#,C,F,G)->(A3)*8";
 
 const getPartition = () => partition;
 
